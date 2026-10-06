@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "jalsetu",
+  "name": "tanker-tracking-for-societies",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -23,20 +23,21 @@
     {
       "binding": "DB",
       "database_name": "jalsetu-db",
-      // Created with `wrangler d1 create jalsetu-db`
-      "database_id": "700cb3a4-8ffc-4151-9137-aa1ec2232d4e",
+      // No database_id: `wrangler deploy` creates the database in the deploying account on first deploy,
+      // and the Worker applies migrations/ itself on its first request (src/worker/lib/migrate.ts).
       "migrations_dir": "migrations"
     }
   ],
 
   "r2_buckets": [
+    // Created automatically on first deploy (R2 must be enabled on the account).
     { "binding": "PHOTOS", "bucket_name": "jalsetu-photos" }
   ],
 
   "kv_namespaces": [
     // Used for rate limiting (sensor API, login throttling per IP).
-    // Created with `wrangler kv namespace create RATE_LIMIT`
-    { "binding": "RATE_LIMIT", "id": "2ed46a3b215144c9a503b25ef17ae07d" }
+    // No id: created automatically on first `wrangler deploy`.
+    { "binding": "RATE_LIMIT" }
   ],
 
   "vars": {
@@ -49,6 +50,6 @@
 
   // Secrets (never commit): set with `wrangler secret put <NAME>`
   //   TURNSTILE_SECRET_KEY   - Turnstile secret
-  //   UPLOAD_SIGNING_SECRET  - HMAC key for signed R2 upload URLs (random 32+ chars)
+  //   UPLOAD_SIGNING_SECRET  - optional HMAC key for signed R2 uploads (else a random key is generated and kept in D1)
   //   ADMIN_BOOTSTRAP_TOKEN  - required by the one-time /setup page to create the first super admin
 }

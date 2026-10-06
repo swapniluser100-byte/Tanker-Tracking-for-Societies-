@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import type { AppEnv } from './env';
 import { getDb } from './lib/http';
+import { ensureSchema } from './lib/migrate';
 import { securityHeaders, csrfProtection } from './middleware/security';
 import { sessionMiddleware } from './middleware/auth';
 import authRoutes from './routes/auth';
@@ -19,6 +20,7 @@ const app = new Hono<AppEnv>();
 
 app.use('/api/*', securityHeaders);
 app.use('/api/*', async (c, next) => {
+  await ensureSchema(c.env.DB);
   c.set('db', getDb(c.env.DB));
   await next();
 });

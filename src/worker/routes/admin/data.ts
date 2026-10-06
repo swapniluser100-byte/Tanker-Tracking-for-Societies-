@@ -56,7 +56,7 @@ data.get('/readings.csv', range, async (c) => {
   return csvResponse(`jalsetu-readings-${istDate()}.csv`, toCsv(res.results));
 });
 
-/** Full JSON backup (super admin only). Password hashes, salts, session tokens and API key hashes are excluded. */
+/** Full JSON backup (super admin only). Password hashes, salts, session tokens, API key hashes and the upload signing key are excluded. */
 data.get('/backup.json', requireRole(...SUPER_ONLY), async (c) => {
   const d1 = c.env.DB;
   const tables: Record<string, string> = {
@@ -80,7 +80,7 @@ data.get('/backup.json', requireRole(...SUPER_ONLY), async (c) => {
     notification_templates: 'SELECT * FROM notification_templates',
     api_keys: 'SELECT id, name, prefix, scope, tank_id, last_used_at, revoked_at, created_by, created_at FROM api_keys',
     audit_logs: 'SELECT * FROM audit_logs',
-    settings: 'SELECT * FROM settings',
+    settings: "SELECT * FROM settings WHERE key != 'upload_signing_secret'",
   };
   const names = Object.keys(tables);
   const results = await d1.batch(names.map((n) => d1.prepare(tables[n])));

@@ -35,17 +35,11 @@ npm install
 cp .dev.vars.example .dev.vars        # local secrets (Turnstile test keys, upload signing secret, bootstrap token)
 ```
 
-### 1. Create the D1 database, R2 bucket and KV namespace
+### 1. Cloudflare resources (nothing to do)
 
-For local development the IDs in `wrangler.jsonc` can stay as placeholders, because `wrangler dev` uses local storage. To deploy, create the real resources and paste their IDs into `wrangler.jsonc`:
+`wrangler.jsonc` deliberately has **no** D1 or KV IDs. On the first `wrangler deploy`, wrangler creates the D1 database, KV namespace and R2 bucket in the account it deploys to. R2 must be enabled on that account first (Dashboard → R2 → enable). The Worker applies the SQL in `migrations/` on its first request (`src/worker/lib/migrate.ts`), so a fresh deployment needs no separate migration step. Running `wrangler d1 migrations apply` by hand still works, because both share the `d1_migrations` table.
 
-```bash
-npx wrangler d1 create jalsetu-db                 # copy database_id into wrangler.jsonc
-npx wrangler r2 bucket create jalsetu-photos
-npx wrangler kv namespace create RATE_LIMIT       # copy id into wrangler.jsonc
-```
-
-### 2. Apply migrations and seed sample data
+### 2. Apply migrations and seed sample data (local)
 
 ```bash
 npx wrangler d1 migrations apply jalsetu-db --local
@@ -117,24 +111,22 @@ npx wrangler secret put TURNSTILE_SECRET_KEY      # from the Cloudflare dashboar
 ```
 
 ```bash
-npx wrangler secret put UPLOAD_SIGNING_SECRET     # any random 32+ character string
-```
-
-```bash
 npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN     # random string, used once for first-admin setup
 ```
+
+Optional: `UPLOAD_SIGNING_SECRET`. If you don't set it, the Worker generates a random signing key and keeps it in D1. Secrets can also be added in the dashboard under Worker → Settings → Variables and Secrets.
 
 Also set `TURNSTILE_SITE_KEY` in `wrangler.jsonc` → `vars` to your real site key. The committed value is Cloudflare's always-pass test key.
 
 ## Deploying
 
-```bash
-npx wrangler d1 migrations apply jalsetu-db --remote
-```
+Push to GitHub and Cloudflare Workers Builds deploys automatically: it runs `npx wrangler deploy`, which builds the React app through `build.command` in `wrangler.jsonc`. To deploy by hand:
 
 ```bash
-npm run deploy         # vite build + wrangler deploy
+npm run deploy
 ```
+
+The Worker name in `wrangler.jsonc` (`tanker-tracking-for-societies`) must match the Worker connected to Workers Builds.
 
 Then open `/setup` (or run `npm run admin:create`) to create the super admin. Add flats via **Admin → Wings & flats → Import CSV** and create users under **Admin → Users & roles**.
 
