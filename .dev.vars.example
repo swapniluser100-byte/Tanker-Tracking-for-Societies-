@@ -1,0 +1,6 @@
+# Copy to .dev.vars for `wrangler dev`. These are Cloudflare's published Turnstile TEST keys (always pass).
+APP_ENV=development
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+UPLOAD_SIGNING_SECRET=dev-only-upload-signing-secret-change-me
+ADMIN_BOOTSTRAP_TOKEN=dev-bootstrap-token
+ALLOWED_ORIGINS=http://localhost:5173

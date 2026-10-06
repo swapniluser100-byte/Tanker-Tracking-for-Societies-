@@ -1,0 +1,50 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jalsetu",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // React app built by Vite into dist/client and served as Workers static assets.
+  // Only /api/* runs the Worker first; everything else is a static file or the SPA shell.
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jalsetu-db",
+      // Replace with the id printed by `wrangler d1 create jalsetu-db`
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "r2_buckets": [
+    { "binding": "PHOTOS", "bucket_name": "jalsetu-photos" }
+  ],
+
+  "kv_namespaces": [
+    // Used for rate limiting (sensor API, login throttling per IP).
+    // Replace with the id printed by `wrangler kv namespace create RATE_LIMIT`
+    { "binding": "RATE_LIMIT", "id": "00000000000000000000000000000000" }
+  ],
+
+  "vars": {
+    "APP_ENV": "production",
+    // Cloudflare Turnstile site key (public). Secret key is set with `wrangler secret put TURNSTILE_SECRET_KEY`.
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    // Comma-separated extra origins allowed for state-changing requests (CSRF Origin check).
+    "ALLOWED_ORIGINS": ""
+  }
+
+  // Secrets (never commit): set with `wrangler secret put <NAME>`
+  //   TURNSTILE_SECRET_KEY   - Turnstile secret
+  //   UPLOAD_SIGNING_SECRET  - HMAC key for signed R2 upload URLs (random 32+ chars)
+  //   ADMIN_BOOTSTRAP_TOKEN  - required by the one-time /setup page to create the first super admin
+}

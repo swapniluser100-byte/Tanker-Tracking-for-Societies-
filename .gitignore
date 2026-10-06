@@ -1,0 +1,9 @@
+node_modules
+dist
+.wrangler
+.dev.vars
+seed/seed.sql
+*.log
+.DS_Store
+seed/last-seed-output.txt
+.claude/
