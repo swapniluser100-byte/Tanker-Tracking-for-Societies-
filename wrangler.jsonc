@@ -6,6 +6,10 @@
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
 
+  // Build the React app before every `wrangler deploy` / `wrangler dev`, so CI (e.g. Cloudflare
+  // Workers Builds running only `npx wrangler deploy`) always has dist/client.
+  "build": { "command": "npm run build", "watch_dir": "src/client" },
+
   // React app built by Vite into dist/client and served as Workers static assets.
   // Only /api/* runs the Worker first; everything else is a static file or the SPA shell.
   "assets": {
@@ -19,8 +23,8 @@
     {
       "binding": "DB",
       "database_name": "jalsetu-db",
-      // Replace with the id printed by `wrangler d1 create jalsetu-db`
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Created with `wrangler d1 create jalsetu-db`
+      "database_id": "700cb3a4-8ffc-4151-9137-aa1ec2232d4e",
       "migrations_dir": "migrations"
     }
   ],
@@ -31,8 +35,8 @@
 
   "kv_namespaces": [
     // Used for rate limiting (sensor API, login throttling per IP).
-    // Replace with the id printed by `wrangler kv namespace create RATE_LIMIT`
-    { "binding": "RATE_LIMIT", "id": "00000000000000000000000000000000" }
+    // Created with `wrangler kv namespace create RATE_LIMIT`
+    { "binding": "RATE_LIMIT", "id": "2ed46a3b215144c9a503b25ef17ae07d" }
   ],
 
   "vars": {
